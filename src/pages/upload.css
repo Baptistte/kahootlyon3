@@ -98,6 +98,48 @@
 .step-body p { color: rgba(255,255,255,0.55); font-family: 'Inter', sans-serif; font-size: 0.83rem; line-height: 1.5; margin-bottom: 0.6rem; }
 .step-body em { color: rgba(255,255,255,0.75); font-style: italic; }
 
+/* Question count picker */
+.question-count-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.count-slider {
+  flex: 1;
+  min-width: 100px;
+  accent-color: #ffd700;
+  cursor: pointer;
+  height: 4px;
+}
+
+.count-input {
+  width: 60px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.3rem 0.4rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.count-input:focus { border-color: #ffd700; }
+.count-input::-webkit-inner-spin-button,
+.count-input::-webkit-outer-spin-button { opacity: 0.4; }
+
+.count-unit {
+  color: rgba(255,255,255,0.5);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 .btn-copy-prompt {
   background: #ffd700; color: #1a1a2e; border: none; border-radius: 8px;
   padding: 0.5rem 1.1rem; font-weight: 700; font-size: 0.85rem;
@@ -151,6 +193,7 @@
 }
 
 .prompt-preview-header span { color: rgba(255,255,255,0.5); font-size: 0.78rem; font-family: 'Inter', sans-serif; }
+.prompt-preview-header strong { color: #ffd700; font-family: 'Montserrat', sans-serif; }
 .prompt-preview-header button {
   background: none; border: none; cursor: pointer; font-size: 0.9rem;
 }

@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext'
 import type { QuizData, Group } from '../types'
 import './upload.css'
 
-const AI_PROMPT = `Tu es un expert pédagogique. Génère un quiz de révision au format JSON strict.
+const buildPrompt = (questionCount: number) => `Tu es un expert pédagogique. Génère un quiz de révision au format JSON strict.
 
-━━━ FORMAT ATTENDU ━━━
+━━━ FORMAT JSON EXACT ━━━
+Réponds avec UNIQUEMENT ce JSON, rien d'autre. Pas de \`\`\`json, pas de texte avant ou après.
+
 {
   "title": "Titre descriptif du quiz",
   "questions": [
@@ -16,25 +18,34 @@ const AI_PROMPT = `Tu es un expert pédagogique. Génère un quiz de révision a
       "answers": ["Réponse A", "Réponse B", "Réponse C", "Réponse D"],
       "correct": 0,
       "timeLimit": 20
+    },
+    {
+      "question": "Autre question ?",
+      "answers": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "correct": 2,
+      "timeLimit": 20
     }
   ]
 }
 
+Chaque objet question contient EXACTEMENT ces 4 champs :
+- "question" → string : le texte de la question
+- "answers" → tableau de 4 strings : exactement 4 réponses, ni plus ni moins
+- "correct" → nombre entier : l'index (0, 1, 2 ou 3) de la bonne réponse dans "answers"
+- "timeLimit" → nombre entier : 20 (ou 30 pour une question complexe)
+
 ━━━ NOMBRE DE QUESTIONS ━━━
-- Génère 20 à 25 questions pour 10 pages de cours
-- Adapte proportionnellement : ~10 questions pour 4-5 pages, ~30 pour 15 pages
-- Pas de limite absolue : couvre tout le contenu fourni sans en sauter
+Génère exactement ${questionCount} questions.
 
 ━━━ RÈGLES OBLIGATOIRES ━━━
-1. "correct" = index 0 à 3 de la bonne réponse dans "answers"
-2. "timeLimit" = 20 secondes (30 pour les questions complexes)
-3. Les 4 réponses doivent avoir une LONGUEUR SIMILAIRE
-4. La bonne réponse ne doit PAS être systématiquement la plus longue
-5. Varie la position de la bonne réponse (répartis équitablement entre 0, 1, 2 et 3)
-6. Les mauvaises réponses doivent être PLAUSIBLES et du même registre que la bonne
-7. Questions variées : définitions, applications, comparaisons, cas pratiques, chiffres clés
-8. Réponds UNIQUEMENT avec le JSON brut, sans markdown, sans texte avant/après
-9. INTERDIT : n'invente rien. Chaque question doit être entièrement fondée sur le contenu du cours fourni — aucune information extérieure, aucune connaissance générale
+1. "correct" doit être un entier entre 0 et 3, pas un texte, pas un tableau
+2. "answers" doit contenir EXACTEMENT 4 éléments
+3. Les 4 réponses doivent avoir une longueur similaire
+4. La bonne réponse ne doit PAS être systématiquement la plus longue ni la plus courte
+5. Répartis la position de la bonne réponse équitablement entre 0, 1, 2 et 3
+6. Les mauvaises réponses doivent être plausibles et du même registre que la bonne
+7. Varie les types de questions : définitions, applications, comparaisons, cas pratiques, chiffres clés
+8. INTERDIT : n'invente rien. Chaque question doit être fondée exclusivement sur le contenu du cours fourni — aucune information extérieure, aucune connaissance générale
 
 ━━━ CONTENU DU COURS ━━━
 [COLLE ICI LE CONTENU DE TON COURS]`
@@ -49,6 +60,7 @@ export default function Upload() {
   const [isPublic, setIsPublic] = useState(true)
   const [selectedGroup, setSelectedGroup] = useState('')
   const [groups, setGroups] = useState<Group[]>([])
+  const [questionCount, setQuestionCount] = useState(20)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -104,7 +116,7 @@ export default function Upload() {
   }
 
   const copyPrompt = () => {
-    navigator.clipboard.writeText(AI_PROMPT)
+    navigator.clipboard.writeText(buildPrompt(questionCount))
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
   }
@@ -160,8 +172,27 @@ export default function Upload() {
                   <div className="ai-step">
                     <div className="step-num">1</div>
                     <div className="step-body">
-                      <strong>Copie le prompt</strong>
-                      <p>Ce prompt est optimisé pour générer un JSON parfait.</p>
+                      <strong>Choisis le nombre de questions</strong>
+                      <div className="question-count-row">
+                        <input
+                          type="range"
+                          min={5}
+                          max={60}
+                          step={5}
+                          value={questionCount}
+                          onChange={e => setQuestionCount(Number(e.target.value))}
+                          className="count-slider"
+                        />
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={questionCount}
+                          onChange={e => setQuestionCount(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+                          className="count-input"
+                        />
+                        <span className="count-unit">questions</span>
+                      </div>
                       <button className="btn-copy-prompt" onClick={copyPrompt}>
                         {copied ? '✅ Copié !' : '📋 Copier le prompt'}
                       </button>
@@ -203,10 +234,10 @@ export default function Upload() {
                 {/* Prompt preview */}
                 <div className="prompt-preview">
                   <div className="prompt-preview-header">
-                    <span>Aperçu du prompt</span>
+                    <span>Aperçu du prompt · <strong>{questionCount} questions</strong></span>
                     <button onClick={copyPrompt}>{copied ? '✅' : '📋'}</button>
                   </div>
-                  <pre>{AI_PROMPT}</pre>
+                  <pre>{buildPrompt(questionCount)}</pre>
                 </div>
               </div>
             )}
