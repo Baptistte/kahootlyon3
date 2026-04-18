@@ -8,6 +8,7 @@ import Upload from './pages/Upload'
 import LeaderboardPage from './pages/LeaderboardPage'
 import Groups from './pages/Groups'
 import GroupDetail from './pages/GroupDetail'
+import Dashboard from './pages/Dashboard'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/leaderboard/:id" element={<LeaderboardPage />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:code" element={<GroupDetail />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

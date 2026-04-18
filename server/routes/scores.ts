@@ -56,4 +56,17 @@ router.get('/my', requireAuth, async (req: AuthRequest, res: Response) => {
   res.json(rows)
 })
 
+router.get('/my/stats', requireAuth, async (req: AuthRequest, res: Response) => {
+  const rows = await sql`
+    SELECT
+      COUNT(*)::int as games_played,
+      COALESCE(MAX(s.score), 0)::int as best_score,
+      COALESCE(SUM(s.score), 0)::int as total_score,
+      COALESCE(ROUND(AVG(s.correct::float / NULLIF(s.total, 0) * 100)), 0)::int as avg_pct
+    FROM scores s
+    WHERE s.user_id = ${req.userId}
+  `
+  res.json(rows[0] ?? { games_played: 0, best_score: 0, total_score: 0, avg_pct: 0 })
+})
+
 export default router

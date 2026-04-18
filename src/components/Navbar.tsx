@@ -12,6 +12,7 @@ export default function Navbar() {
       <div className="nav-links">
         {user ? (
           <>
+            <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
             <Link to="/groups" className="nav-link">👥 Groupes</Link>
             <Link to="/upload" className="nav-link">+ Upload</Link>
             <span className="nav-user">👤 {user.username}</span>

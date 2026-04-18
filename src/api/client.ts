@@ -72,4 +72,10 @@ export const api = {
 
   removeMember: (code: string, username: string) =>
     request<{ ok: boolean }>(`/groups/${code}/members/${username}`, { method: 'DELETE' }),
+
+  getMyScores: () =>
+    request<Array<{ score: number; correct: number; total: number; played_at: number; quiz_title: string; quiz_id: number }>>('/scores/my'),
+
+  getMyStats: () =>
+    request<{ games_played: number; best_score: number; total_score: number; avg_pct: number }>('/scores/my/stats'),
 }
