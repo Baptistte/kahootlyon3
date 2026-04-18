@@ -135,7 +135,8 @@ export default function Home() {
                 </div>
 
                 <div className="quiz-card-actions" onClick={e => e.stopPropagation()}>
-                  <button className="btn-play" onClick={() => nav(`/play/${q.id}`)}>▶ Jouer</button>
+                  <button className="btn-play" onClick={() => nav(`/play/${q.id}`)}>▶ Quiz</button>
+                  <button className="btn-fc" onClick={() => nav(`/flashcard/${q.id}`)} title="Flashcards">🃏</button>
                   <button className="btn-lb" onClick={() => nav(`/leaderboard/${q.id}`)} title="Classement">🏆</button>
                 </div>
               </div>

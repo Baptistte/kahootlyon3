@@ -374,7 +374,7 @@
 }
 .btn-play:hover { background: #9040ff; }
 
-.btn-lb {
+.btn-fc, .btn-lb {
   background: rgba(255,255,255,0.08);
   color: white;
   border: none;
@@ -384,6 +384,7 @@
   font-size: 0.88rem;
   transition: background 0.15s;
 }
+.btn-fc:hover { background: rgba(192,132,252,0.25); }
 .btn-lb:hover { background: rgba(255,215,0,0.2); }
 
 @media (max-width: 540px) {

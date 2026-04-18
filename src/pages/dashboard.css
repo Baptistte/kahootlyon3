@@ -290,19 +290,22 @@
   font-size: 0.72rem;
 }
 
-.btn-mini-play {
-  background: #7b2ff7;
-  color: white;
+.quiz-mini-btns { display: flex; gap: 0.35rem; flex-shrink: 0; }
+
+.btn-mini-play, .btn-mini-fc {
   border: none;
   border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  width: 28px; height: 28px;
   cursor: pointer;
   font-size: 0.75rem;
   transition: background 0.15s;
-  flex-shrink: 0;
 }
+
+.btn-mini-play { background: #7b2ff7; color: white; }
 .btn-mini-play:hover { background: #9040ff; }
+
+.btn-mini-fc { background: rgba(192,132,252,0.2); color: white; }
+.btn-mini-fc:hover { background: rgba(192,132,252,0.35); }
 
 /* Group mini list */
 .group-mini-list { display: flex; flex-direction: column; gap: 0.45rem; }

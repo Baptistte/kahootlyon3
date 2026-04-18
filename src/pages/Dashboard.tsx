@@ -135,7 +135,10 @@ export default function Dashboard() {
                         <span className="quiz-mini-title">{q.title}</span>
                         <span className="quiz-mini-meta">{q.questionCount} questions{q.groupName ? ` · ${q.groupName}` : ''}</span>
                       </div>
-                      <button className="btn-mini-play" onClick={e => { e.stopPropagation(); nav(`/play/${q.id}`) }}>▶</button>
+                      <div className="quiz-mini-btns" onClick={e => e.stopPropagation()}>
+                        <button className="btn-mini-play" onClick={() => nav(`/play/${q.id}`)}>▶</button>
+                        <button className="btn-mini-fc" onClick={() => nav(`/flashcard/${q.id}`)}>🃏</button>
+                      </div>
                     </div>
                   ))}
                   {quizzes.length > 5 && (

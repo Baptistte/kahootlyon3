@@ -9,6 +9,7 @@ import LeaderboardPage from './pages/LeaderboardPage'
 import Groups from './pages/Groups'
 import GroupDetail from './pages/GroupDetail'
 import Dashboard from './pages/Dashboard'
+import Flashcard from './pages/Flashcard'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:code" element={<GroupDetail />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/flashcard/:id" element={<Flashcard />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
