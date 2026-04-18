@@ -23,7 +23,7 @@ const AI_PROMPT = `Tu es un expert pédagogique. Génère un quiz de révision a
 ━━━ NOMBRE DE QUESTIONS ━━━
 - Génère 20 à 25 questions pour 10 pages de cours
 - Adapte proportionnellement : ~10 questions pour 4-5 pages, ~30 pour 15 pages
-- Maximum absolu : 40 questions
+- Pas de limite absolue : couvre tout le contenu fourni sans en sauter
 
 ━━━ RÈGLES OBLIGATOIRES ━━━
 1. "correct" = index 0 à 3 de la bonne réponse dans "answers"
@@ -34,6 +34,7 @@ const AI_PROMPT = `Tu es un expert pédagogique. Génère un quiz de révision a
 6. Les mauvaises réponses doivent être PLAUSIBLES et du même registre que la bonne
 7. Questions variées : définitions, applications, comparaisons, cas pratiques, chiffres clés
 8. Réponds UNIQUEMENT avec le JSON brut, sans markdown, sans texte avant/après
+9. INTERDIT : n'invente rien. Chaque question doit être entièrement fondée sur le contenu du cours fourni — aucune information extérieure, aucune connaissance générale
 
 ━━━ CONTENU DU COURS ━━━
 [COLLE ICI LE CONTENU DE TON COURS]`
