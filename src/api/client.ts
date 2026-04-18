@@ -66,4 +66,10 @@ export const api = {
 
   leaveGroup: (code: string) =>
     request<{ ok: boolean }>(`/groups/${code}/leave`, { method: 'DELETE' }),
+
+  deleteGroup: (code: string) =>
+    request<{ ok: boolean }>(`/groups/${code}`, { method: 'DELETE' }),
+
+  removeMember: (code: string, username: string) =>
+    request<{ ok: boolean }>(`/groups/${code}/members/${username}`, { method: 'DELETE' }),
 }

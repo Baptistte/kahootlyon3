@@ -93,8 +93,34 @@ router.delete('/:code/leave', requireAuth, async (req: AuthRequest, res: Respons
   const rows = await sql`SELECT id, owner_id FROM groups WHERE code = ${req.params.code.toUpperCase()}`
   const group = rows[0] as { id: number; owner_id: number } | undefined
   if (!group) { res.status(404).json({ error: 'Groupe introuvable' }); return }
-  if (group.owner_id === req.userId) { res.status(400).json({ error: "L'hôte ne peut pas quitter le groupe" }); return }
+  if (group.owner_id === req.userId) { res.status(400).json({ error: "Le créateur ne peut pas quitter — supprime le groupe à la place" }); return }
   await sql`DELETE FROM group_members WHERE group_id = ${group.id} AND user_id = ${req.userId}`
+  res.json({ ok: true })
+})
+
+// Supprimer un groupe (créateur seulement)
+router.delete('/:code', requireAuth, async (req: AuthRequest, res: Response) => {
+  const rows = await sql`SELECT id, owner_id FROM groups WHERE code = ${req.params.code.toUpperCase()}`
+  const group = rows[0] as { id: number; owner_id: number } | undefined
+  if (!group) { res.status(404).json({ error: 'Groupe introuvable' }); return }
+  if (group.owner_id !== req.userId) { res.status(403).json({ error: 'Seul le créateur peut supprimer le groupe' }); return }
+  await sql`DELETE FROM groups WHERE id = ${group.id}`
+  res.json({ ok: true })
+})
+
+// Retirer un membre (créateur seulement)
+router.delete('/:code/members/:username', requireAuth, async (req: AuthRequest, res: Response) => {
+  const rows = await sql`SELECT id, owner_id FROM groups WHERE code = ${req.params.code.toUpperCase()}`
+  const group = rows[0] as { id: number; owner_id: number } | undefined
+  if (!group) { res.status(404).json({ error: 'Groupe introuvable' }); return }
+  if (group.owner_id !== req.userId) { res.status(403).json({ error: 'Accès refusé' }); return }
+
+  const userRows = await sql`SELECT id FROM users WHERE username = ${req.params.username}`
+  const target = userRows[0] as { id: number } | undefined
+  if (!target) { res.status(404).json({ error: 'Utilisateur introuvable' }); return }
+  if (target.id === req.userId) { res.status(400).json({ error: 'Tu ne peux pas te retirer toi-même' }); return }
+
+  await sql`DELETE FROM group_members WHERE group_id = ${group.id} AND user_id = ${target.id}`
   res.json({ ok: true })
 })
 

@@ -10,6 +10,25 @@ const SHAPE_ICONS = ['▲', '◆', '●', '■']
 const ANSWER_COLORS = ['#e21b3c', '#1368ce', '#ffa602', '#26890c']
 const KEYS = ['1', '2', '3', '4', 'a', 'b', 'c', 'd']
 
+interface SavedState {
+  qIndex: number
+  score: number
+  streak: number
+  history: boolean[]
+  phase: 'question' | 'answer'
+  selected: number | null
+}
+
+function saveKey(id: string) { return `kahoot_state_${id}` }
+function saveState(id: string, s: SavedState) {
+  localStorage.setItem(saveKey(id), JSON.stringify(s))
+}
+function loadState(id: string): SavedState | null {
+  try { return JSON.parse(localStorage.getItem(saveKey(id)) ?? 'null') as SavedState | null }
+  catch { return null }
+}
+function clearState(id: string) { localStorage.removeItem(saveKey(id)) }
+
 export default function Play() {
   const { id } = useParams<{ id: string }>()
   const [quiz, setQuiz] = useState<QuizData & { id: number } | null>(null)
@@ -21,7 +40,9 @@ export default function Play() {
   const [timeLeft, setTimeLeft] = useState(20)
   const [history, setHistory] = useState<boolean[]>([])
   const [paused, setPaused] = useState(false)
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [soundOn, setSoundOn] = useState(true)
+  const [savedState, setSavedState] = useState<SavedState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -37,7 +58,12 @@ export default function Play() {
   useEffect(() => {
     if (!id) return
     api.getQuiz(Number(id))
-      .then(data => { setQuiz(data); setLoading(false) })
+      .then(data => {
+        setQuiz(data)
+        const s = loadState(id)
+        setSavedState(s)
+        setLoading(false)
+      })
       .catch(() => { setError('Quiz introuvable'); setLoading(false) })
   }, [id])
 
@@ -57,7 +83,7 @@ export default function Play() {
       setTimeLeft(prev => {
         if (prev <= 1) { stopTimer(); setPhase('answer'); return 0 }
         if (prev <= 5) sound.playCountdownBeep()
-        else if (prev === limit) { /* first tick */ } else sound.playTick()
+        else if (prev > 1) sound.playTick()
         return prev - 1
       })
     }, 1000)
@@ -71,7 +97,7 @@ export default function Play() {
     return stopTimer
   }, [phase, qIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pause / resume
+  // Pause/resume
   useEffect(() => {
     if (phase !== 'question') return
     if (paused) {
@@ -88,10 +114,15 @@ export default function Play() {
           return prev - 1
         })
       }, 1000)
-      // adjust startTime so speed bonus is accurate
       startTimeRef.current = Date.now() - (timeLimit - remaining) * 1000
     }
   }, [paused]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save on every meaningful state change
+  useEffect(() => {
+    if (!id || phase === 'lobby' || phase === 'end') return
+    saveState(id, { qIndex, score, streak, history, phase: phase as 'question' | 'answer', selected })
+  }, [qIndex, score, streak, history, phase, selected, id])
 
   const handleAnswer = useCallback((index: number) => {
     if (selected !== null || phase !== 'question' || paused) return
@@ -111,14 +142,23 @@ export default function Play() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+      if (showQuitConfirm) {
+        if (e.key === 'Escape') setShowQuitConfirm(false)
+        return
+      }
+      if (e.key === 'p' || e.key === 'P') {
         if (phase === 'question') setPaused(v => !v)
         return
       }
-      if (phase === 'answer' && (e.key === 'Enter' || e.key === ' ')) {
-        e.preventDefault()
-        handleNext()
+      if (e.key === 'Escape') {
+        if (phase === 'question' || phase === 'answer') {
+          setPaused(true)
+          setShowQuitConfirm(true)
+        }
         return
+      }
+      if (phase === 'answer' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault(); handleNext(); return
       }
       if (phase === 'question' && !paused) {
         const idx = KEYS.indexOf(e.key.toLowerCase())
@@ -127,12 +167,13 @@ export default function Play() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [phase, paused, handleAnswer]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, paused, handleAnswer, showQuitConfirm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleNext = () => {
     if (!quiz) return
     if (qIndex + 1 >= quiz.questions.length) {
       sound.playEnd()
+      clearState(String(quiz.id))
       setPhase('end')
       if (user) api.submitScore(quiz.id, score, history.filter(Boolean).length + (selected === currentQ?.correct ? 1 : 0), quiz.questions.length).catch(() => {})
     } else {
@@ -142,36 +183,78 @@ export default function Play() {
     }
   }
 
-  const restart = () => {
+  const restart = (fromSaved = false) => {
     stopTimer()
-    setPhase('lobby')
-    setQIndex(0)
-    setSelected(null)
-    setScore(0)
-    setStreak(0)
-    setHistory([])
+    if (fromSaved && savedState) {
+      setQIndex(savedState.qIndex)
+      setScore(savedState.score)
+      setStreak(savedState.streak)
+      setHistory(savedState.history)
+      setSelected(savedState.selected)
+      setPhase(savedState.phase)
+    } else {
+      if (id) clearState(id)
+      setSavedState(null)
+      setPhase('question')
+      setQIndex(0)
+      setSelected(null)
+      setScore(0)
+      setStreak(0)
+      setHistory([])
+    }
     setPaused(false)
+    setShowQuitConfirm(false)
+  }
+
+  const quitToMenu = () => {
+    stopTimer()
+    // State is already auto-saved
+    nav('/')
   }
 
   if (loading) return <div className="play-loading">Chargement…</div>
   if (error || !quiz) return <div className="play-loading">{error || 'Erreur'}</div>
 
+  // ── Lobby ─────────────────────────────────────────
   if (phase === 'lobby') return (
     <div className="play-screen lobby">
       <div className="lobby-card">
+        <button className="lobby-back" onClick={() => nav('/')}>← Menu</button>
         <div className="logo">KahootJade 💜</div>
         <h1>{quiz.title}</h1>
         <p className="q-count">{quiz.questions.length} questions</p>
-        <label className="sound-toggle">
-          <input type="checkbox" checked={soundOn} onChange={e => setSoundOn(e.target.checked)} />
-          🔊 Sons activés
-        </label>
-        <button className="btn-start" onClick={() => setPhase('question')}>C'est parti !</button>
-        <p className="key-hint">Raccourcis : <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> pour répondre · <kbd>P</kbd> pause · <kbd>Entrée</kbd> suivant</p>
+
+        {savedState && (
+          <div className="resume-banner">
+            <div className="resume-info">
+              <span className="resume-icon">💾</span>
+              <div>
+                <strong>Partie en cours</strong>
+                <span>Question {savedState.qIndex + 1}/{quiz.questions.length} · {savedState.score} pts</span>
+              </div>
+            </div>
+            <div className="resume-btns">
+              <button className="btn-resume" onClick={() => restart(true)}>▶ Reprendre</button>
+              <button className="btn-new-game" onClick={() => restart(false)}>Nouvelle partie</button>
+            </div>
+          </div>
+        )}
+
+        {!savedState && (
+          <>
+            <label className="sound-toggle">
+              <input type="checkbox" checked={soundOn} onChange={e => setSoundOn(e.target.checked)} />
+              🔊 Sons activés
+            </label>
+            <button className="btn-start" onClick={() => restart(false)}>C'est parti !</button>
+            <p className="key-hint"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> répondre · <kbd>P</kbd> pause · <kbd>Échap</kbd> quitter</p>
+          </>
+        )}
       </div>
     </div>
   )
 
+  // ── End ───────────────────────────────────────────
   if (phase === 'end') {
     const correct = history.filter(Boolean).length
     const pct = Math.round(correct / quiz.questions.length * 100)
@@ -186,7 +269,7 @@ export default function Play() {
             {history.map((ok, i) => <span key={i} className={`result-dot ${ok ? 'ok' : 'ko'}`} />)}
           </div>
           <div className="end-btns">
-            <button className="btn-start" onClick={restart}>Rejouer</button>
+            <button className="btn-start" onClick={() => { setSavedState(null); setPhase('lobby') }}>Rejouer</button>
             <button className="btn-outline" onClick={() => nav(`/leaderboard/${quiz.id}`)}>🏆 Classement</button>
             <button className="btn-outline" onClick={() => nav('/')}>← Menu</button>
           </div>
@@ -195,6 +278,7 @@ export default function Play() {
     )
   }
 
+  // ── Game ──────────────────────────────────────────
   return (
     <div className="play-screen game">
       {/* Header */}
@@ -203,6 +287,9 @@ export default function Play() {
           <div className="progress-fill" style={{ width: `${(qIndex / quiz.questions.length) * 100}%` }} />
         </div>
         <div className="header-row">
+          <button className="btn-quit-sm" onClick={() => { setPaused(true); setShowQuitConfirm(true) }} title="Quitter (Échap)">
+            ✕
+          </button>
           <span className="q-counter">{qIndex + 1} / {quiz.questions.length}</span>
 
           <div className={`timer ${timeLeft <= 5 ? 'timer-danger' : ''}`}>
@@ -223,26 +310,39 @@ export default function Play() {
           <div className="header-right">
             <span className="score-display">{score} pts</span>
             {streak >= 2 && <span className="streak">🔥×{streak}</span>}
-            <button
-              className="btn-pause"
-              onClick={() => setPaused(v => !v)}
-              title="Pause (P)"
-              disabled={phase !== 'question'}
-            >
+            <button className="btn-pause" onClick={() => setPaused(v => !v)}
+              title="Pause (P)" disabled={phase !== 'question'}>
               {paused ? '▶' : '⏸'}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Pause overlay */}
-      {paused && (
+      {/* Pause / Quit overlay */}
+      {(paused || showQuitConfirm) && (
         <div className="pause-overlay">
           <div className="pause-box">
-            <div className="pause-icon">⏸</div>
-            <p>Pause</p>
-            <button className="btn-start" onClick={() => setPaused(false)}>Reprendre</button>
-            <p className="key-hint-sm">ou appuie sur <kbd>P</kbd></p>
+            {!showQuitConfirm ? (
+              <>
+                <div className="pause-icon">⏸</div>
+                <p>Pause</p>
+                <button className="btn-start" onClick={() => setPaused(false)}>▶ Reprendre</button>
+                <button className="btn-pause-quit" onClick={() => setShowQuitConfirm(true)}>Quitter et sauvegarder</button>
+                <p className="key-hint-sm"><kbd>P</kbd> reprendre · <kbd>Échap</kbd> quitter</p>
+              </>
+            ) : (
+              <>
+                <div className="pause-icon">💾</div>
+                <p>Ta progression est sauvegardée.</p>
+                <p className="quit-sub">Tu pourras reprendre la prochaine fois.</p>
+                <div className="quit-btns">
+                  <button className="btn-start" onClick={quitToMenu}>← Retour au menu</button>
+                  <button className="btn-pause-quit" onClick={() => { setShowQuitConfirm(false); setPaused(false) }}>
+                    Continuer le quiz
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -262,13 +362,10 @@ export default function Play() {
             else state = 'faded'
           }
           return (
-            <button
-              key={i}
-              className={`answer-btn ${state}`}
+            <button key={i} className={`answer-btn ${state}`}
               style={state === '' ? { background: ANSWER_COLORS[i] } : undefined}
               onClick={() => handleAnswer(i)}
-              disabled={phase !== 'question' || paused}
-            >
+              disabled={phase !== 'question' || paused}>
               <span className="shape-icon">{SHAPE_ICONS[i]}</span>
               <span className="answer-text">{ans}</span>
               <kbd className="key-badge">{i + 1}</kbd>
@@ -282,8 +379,7 @@ export default function Play() {
         <div className={`feedback ${selected === currentQ?.correct ? 'feedback-correct' : 'feedback-wrong'}`}>
           <span className="feedback-icon">{selected === currentQ?.correct ? '✓' : '✗'}</span>
           <span className="feedback-text">
-            {selected === null
-              ? 'Temps écoulé !'
+            {selected === null ? 'Temps écoulé !'
               : selected === currentQ?.correct
               ? streak > 1 ? `🔥 Série de ${streak} !` : 'Bonne réponse !'
               : `Bonne réponse : ${currentQ?.answers[currentQ.correct]}`}
