@@ -21,12 +21,12 @@ export default function Flashcard() {
 
   const prev = useCallback(() => {
     setFlipped(false)
-    setTimeout(() => setIndex(i => Math.max(0, i - 1)), 150)
+    setTimeout(() => setIndex(i => Math.max(0, i - 1)), 200)
   }, [])
 
   const next = useCallback(() => {
     setFlipped(false)
-    setTimeout(() => setIndex(i => Math.min(questions.length - 1, i + 1)), 150)
+    setTimeout(() => setIndex(i => Math.min(questions.length - 1, i + 1)), 200)
   }, [questions.length])
 
   useEffect(() => {
@@ -44,71 +44,83 @@ export default function Flashcard() {
 
   const q = questions[index]
   const pct = Math.round(((index + 1) / questions.length) * 100)
+  const isLast = index === questions.length - 1
 
   return (
     <div className="fc-page">
       {/* Header */}
       <div className="fc-header">
         <button className="fc-back" onClick={() => nav(-1)}>← Retour</button>
-        <div className="fc-title">{title}</div>
+        <div className="fc-title-wrap">
+          <div className="fc-title">{title}</div>
+          <div className="fc-subtitle">Flashcards · {questions.length} cartes</div>
+        </div>
         <div className="fc-counter">{index + 1} / {questions.length}</div>
       </div>
 
       {/* Progress */}
-      <div className="fc-progress">
+      <div className="fc-progress-bar">
         <div className="fc-progress-fill" style={{ width: `${pct}%` }} />
       </div>
 
-      {/* Card */}
+      {/* Arena */}
       <div className="fc-arena">
+
+        {/* Card */}
         <div
           className={`fc-card ${flipped ? 'fc-card--flipped' : ''}`}
           onClick={() => setFlipped(f => !f)}
+          role="button"
+          aria-label={flipped ? 'Voir la question' : 'Voir la réponse'}
         >
-          {/* Front */}
-          <div className="fc-face fc-front">
-            <div className="fc-face-label">Question</div>
-            <p className="fc-question-text">{q.question}</p>
-            <div className="fc-hint">Appuie pour révéler la réponse</div>
-          </div>
+          <div className="fc-card-inner">
+            {/* Front */}
+            <div className="fc-face fc-front">
+              <span className="fc-face-tag">Question</span>
+              <p className="fc-text">{q.question}</p>
+              <span className="fc-tap-hint">Appuie pour voir la réponse →</span>
+            </div>
 
-          {/* Back */}
-          <div className="fc-face fc-back">
-            <div className="fc-face-label">Réponse</div>
-            <p className="fc-answer-correct">{q.answers[q.correct]}</p>
-            <div className="fc-other-answers">
-              {q.answers.map((a, i) => i !== q.correct && (
-                <span key={i} className="fc-wrong-answer">{a}</span>
-              ))}
+            {/* Back */}
+            <div className="fc-face fc-back">
+              <span className="fc-face-tag">Réponse</span>
+              <p className="fc-text">{q.answers[q.correct]}</p>
+              <span className="fc-tap-hint">← Appuie pour revoir la question</span>
             </div>
           </div>
         </div>
 
-        {/* Nav */}
+        {/* Nav buttons */}
         <div className="fc-nav">
-          <button className="fc-nav-btn" onClick={prev} disabled={index === 0}>←</button>
+          <button className="fc-nav-btn" onClick={e => { e.stopPropagation(); prev() }} disabled={index === 0}>
+            ← Précédente
+          </button>
+          <button
+            className={`fc-nav-btn fc-nav-btn--next ${isLast ? 'fc-nav-btn--last' : ''}`}
+            onClick={e => { e.stopPropagation(); isLast ? (setIndex(0), setFlipped(false)) : next() }}
+          >
+            {isLast ? '🔁 Recommencer' : 'Suivante →'}
+          </button>
+        </div>
+
+        {/* Dots */}
+        <div className="fc-dots-wrap">
           <div className="fc-dots">
             {questions.map((_, i) => (
               <button
                 key={i}
-                className={`fc-dot ${i === index ? 'fc-dot--active' : ''}`}
-                onClick={() => { setFlipped(false); setTimeout(() => setIndex(i), 150) }}
+                className={`fc-dot ${i === index ? 'fc-dot--active' : i < index ? 'fc-dot--done' : ''}`}
+                onClick={() => { setFlipped(false); setTimeout(() => setIndex(i), 200) }}
+                aria-label={`Carte ${i + 1}`}
               />
             ))}
           </div>
-          <button className="fc-nav-btn" onClick={next} disabled={index === questions.length - 1}>→</button>
         </div>
 
-        <div className="fc-key-hint">
-          <kbd>Espace</kbd> retourner · <kbd>←</kbd><kbd>→</kbd> naviguer
-        </div>
+        <p className="fc-key-hint">
+          <kbd>Espace</kbd> retourner &nbsp;·&nbsp; <kbd>←</kbd> <kbd>→</kbd> naviguer
+        </p>
 
-        {index === questions.length - 1 && flipped && (
-          <div className="fc-end-banner">
-            🎉 Tu as parcouru toutes les cartes !
-            <button onClick={() => { setIndex(0); setFlipped(false) }}>Recommencer</button>
-          </div>
-        )}
       </div>
     </div>
   )
