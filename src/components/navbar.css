@@ -1,0 +1,74 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: white;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.15s;
+}
+
+.nav-link:hover { color: white; }
+
+.nav-user {
+  color: #ffd700;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.nav-logout {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+}
+
+.nav-logout:hover { background: rgba(255,255,255,0.25); }
+
+.btn-nav-login {
+  background: white;
+  color: #46178f;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  transition: opacity 0.15s;
+}
+
+.btn-nav-login:hover { opacity: 0.9; }

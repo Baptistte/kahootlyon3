@@ -1,0 +1,170 @@
+.upload-page {
+  min-height: calc(100vh - 56px);
+  background: linear-gradient(160deg, #46178f 0%, #2d0c6e 100%);
+  padding: 2rem 1rem;
+}
+
+.upload-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) { .upload-layout { grid-template-columns: 1fr; } }
+
+.upload-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.upload-card h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #46178f;
+  margin-bottom: 1.25rem;
+}
+
+.drop-zone {
+  border: 3px dashed #c5a3f5;
+  border-radius: 12px;
+  padding: 2rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.drop-zone:hover { border-color: #7b2ff7; background: #f5edff; }
+.drop-zone.drop-ok { border-color: #26890c; background: #f0fff4; border-style: solid; }
+.drop-icon { font-size: 2rem; }
+.drop-text { color: #555; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+
+.upload-error {
+  background: #fff0f0;
+  color: #e21b3c;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.upload-form { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+.field label { font-size: 0.82rem; font-weight: 600; color: #444; font-family: 'Inter', sans-serif; }
+.field input {
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+.field input:focus { border-color: #46178f; }
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  color: #444;
+  cursor: pointer;
+}
+
+.btn-upload {
+  background: #46178f;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: opacity 0.15s;
+}
+
+.btn-upload:hover:not(:disabled) { opacity: 0.9; }
+.btn-upload:disabled { opacity: 0.5; cursor: default; }
+
+/* Tutorial */
+.upload-tuto {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 1.75rem;
+  color: white;
+}
+
+.upload-tuto h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.upload-tuto pre {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 0.72rem;
+  overflow-x: auto;
+  line-height: 1.6;
+  color: #c5f5c5;
+  margin-bottom: 1.25rem;
+}
+
+.tuto-rules h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.tuto-rules ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.tuto-rules li {
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  color: rgba(255,255,255,0.8);
+}
+
+.tuto-rules code {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.82rem;
+}
+
+.tuto-tip {
+  background: rgba(255,215,0,0.1);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 10px;
+  padding: 0.85rem;
+  font-size: 0.83rem;
+  font-family: 'Inter', sans-serif;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+}
+
+.tuto-tip em {
+  font-style: italic;
+  color: #ffd700;
+}

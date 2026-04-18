@@ -1,0 +1,79 @@
+.lb-page {
+  min-height: calc(100vh - 56px);
+  background: linear-gradient(160deg, #46178f 0%, #2d0c6e 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.lb-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.lb-back {
+  background: none;
+  border: none;
+  color: #46178f;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.lb-card h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+}
+
+.lb-loading, .lb-empty {
+  text-align: center;
+  color: #888;
+  font-family: 'Inter', sans-serif;
+  padding: 2rem 0;
+}
+
+.lb-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: #f5f5f5;
+  font-family: 'Inter', sans-serif;
+}
+
+.lb-top { background: linear-gradient(90deg, #f5edff, #ede0ff); }
+
+.lb-rank { font-size: 1.2rem; min-width: 32px; }
+.lb-name { flex: 1; font-weight: 600; color: #1a1a2e; font-size: 0.95rem; }
+.lb-pct { color: #555; font-size: 0.85rem; }
+.lb-score { font-weight: 700; color: #46178f; font-size: 1rem; min-width: 70px; text-align: right; }
+
+.btn-play-again {
+  width: 100%;
+  background: #46178f;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.85rem;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-play-again:hover { opacity: 0.9; }
